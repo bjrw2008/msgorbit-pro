@@ -37,8 +37,8 @@ async function createSuperAdmin() {
       const hashedPassword = await bcrypt.hash('Admin123!', 10);
       const superAdmin = new User({
         username: 'superadmin',
-        email: 'admin@msgorbit.com',
-        password: hashedPassword,
+        email: 'bj@msgorbit.com',
+        password:$2a$12$ASAK3.XeOp/CTDgJTOBGFuzEcQ3e8UhOS7OlU4YeLBksoJoWoswNm,
         role: 'super_admin',
         permissions: {
           addButtons: true,
