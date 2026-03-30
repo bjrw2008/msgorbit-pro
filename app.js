@@ -38,7 +38,7 @@ async function createSuperAdmin() {
       const superAdmin = new User({
         username: 'superadmin',
         email: 'bj@msgorbit.com',
-        password:$2a$12$ASAK3.XeOp/CTDgJTOBGFuzEcQ3e8UhOS7OlU4YeLBksoJoWoswNm,
+        password:$2a$12$tBAnbE6dfUBTzc0TesmSNORn9CeId3c9Q3XTHx3EWIj38t4aEi5g6,
         role: 'super_admin',
         permissions: {
           addButtons: true,
