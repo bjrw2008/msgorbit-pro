@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MsgOrbit Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🚀 MsgOrbit Pro</h1>
+        <div class="subtitle">Admin Dashboard Login</div>
+        
+        <div id="message" style="display: none;"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="admin@msgorbit.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <div class="info">
+            Demo: admin@msgorbit.com / Admin123!
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const submitBtn = document.querySelector('button');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Login failed. Server may be down.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        });
+        
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = msg;
+            messageDiv.className = type;
+            messageDiv.style.display = 'block';
+            setTimeout(() => messageDiv.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>

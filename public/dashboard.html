@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dashboard - MsgOrbit Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f1a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: rgba(15, 15, 26, 0.98);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(102, 126, 234, 0.2);
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-260px);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            padding: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+        }
+
+        .menu-item i {
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logout-btn {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ff6b6b;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 24px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button.danger {
+            background: rgba(220, 53, 69, 0.8);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .badge-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        /* Buttons Builder */
+        .buttons-container {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-260px);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Alert */
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 3px solid;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🚀 MsgOrbit Pro</h2>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="menu-item" data-page="messages">
+                <i class="fas fa-envelope"></i> Messages
+            </div>
+            <div class="menu-item" data-page="bots" id="botsMenu">
+                <i class="fas fa-robot"></i> Bots
+            </div>
+            <div class="menu-item" data-page="admins" id="adminsMenu">
+                <i class="fas fa-users"></i> Admins
+            </div>
+            <div class="menu-item" data-page="logs">
+                <i class="fas fa-history"></i> Logs
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="navbar">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <div class="user-menu">
+                <span id="username"></span>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="page active">
+                <div class="card">
+                    <div class="card-title">Statistics</div>
+                    <div id="stats"></div>
+                </div>
+            </div>
+
+            <!-- Messages Page -->
+            <div id="messagesPage" class="page">
+                <div class="card">
+                    <div class="card-title">Schedule New Message</div>
+                    <form id="scheduleForm">
+                        <div class="form-group">
+                            <label>Select Bot</label>
+                            <select id="botId" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Chat ID</label>
+                            <input type="text" id="chatId" placeholder="@channel, -100123456789, or user ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Message Text</label>
+                            <textarea id="messageText" rows="4" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Buttons (Optional)</label>
+                            <div id="buttonsBuilder"></div>
+                            <button type="button" onclick="addButtonRow()" style="margin-top: 8px;">+ Add Button</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Send Time</label>
+                            <input type="datetime-local" id="sendTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Repeat</label>
+                            <select id="repeat">
+                                <option value="none">None</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="custom">Custom (minutes)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="customIntervalGroup" style="display: none;">
+                            <label>Interval (minutes)</label>
+                            <input type="number" id="customInterval" placeholder="30">
+                        </div>
+                        <button type="submit">Schedule Message</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Scheduled Messages</div>
+                    <div id="messagesList"></div>
+                </div>
+            </div>
+
+            <!-- Bots Page -->
+            <div id="botsPage" class="page">
+                <div class="card">
+                    <div class="card-title">
+                        Telegram Bots
+                        <button onclick="showAddBotModal()">+ Add Bot</button>
+                    </div>
+                    <div id="botsList"></div>
+                </div>
+            </div>
+
+            <!-- Admins Page (Super Admin Only) -->
+            <div id="adminsPage" class="page">
+                <div class="card">
+                    <div class="card-title">
+                        Admin Management
+                        <button onclick="showAddAdminModal()">+ Add Admin</button>
+                    </div>
+                    <div id="adminsList"></div>
+                </div>
+            </div>
+
+            <!-- Logs Page -->
+            <div id="logsPage" class="page">
+                <div class="card">
+                    <div class="card-title">Activity Logs</div>
+                    <div id="logsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        if (!token) window.location.href = '/login.html';
+        
+        document.getElementById('username').innerHTML = `<i class="fas fa-user-circle"></i> ${user.username}`;
+        
+        // Check permissions for menu items
+        if (user.role !== 'super_admin') {
+            document.getElementById('adminsMenu').style.display = 'none';
+        }
+        
+        // Menu toggle for mobile
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        });
+        
+        // Menu navigation
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(`${page}Page`).classList.add('active');
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                }
+                loadPageData(page);
+            });
+        });
+        
+        function loadPageData(page) {
+            if (page === 'dashboard') loadStats();
+            if (page === 'messages') { loadBotsSelect(); loadMessages(); }
+            if (page === 'bots') loadBots();
+            if (page === 'admins' && user.role === 'super_admin') loadAdmins();
+            if (page === 'logs') loadLogs();
+        }
+        
+        // Stats
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/messages`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const msgs = await res.json();
+                document.getElementById('stats').innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                        <div><strong>Total Messages</strong><br><span style="font-size: 24px;">${msgs.length}</span></div>
+                        <div><strong>Pending</strong><br><span style="font-size: 24px;">${msgs.filter(m => !m.sent).length}</span></div>
+                        <div><strong>Sent</strong><br><span style="font-size: 24px;">${msgs.filter(m => m.sent).length}</span></div>
+                    </div>
+                `;
+            } catch(e) { console.error(e); }
+        }
+        
+        // Buttons Builder
+        let buttons = [];
+        function addButtonRow() {
+            const container = document.getElementById('buttonsBuilder');
+            const row = document.createElement('div');
+            row.className = 'button-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Button Text" style="flex:2">
+                <input type="text" placeholder="URL (optional)" style="flex:3">
+                <button type="button" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(row);
+        }
+        
+        function getButtons() {
+            const buttons = [];
+            document.querySelectorAll('.button-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const text = inputs[0].value;
+                const url = inputs[1].value;
+                if (text) buttons.push({ text, url });
+            });
+            return buttons;
+        }
+        
+        // Schedule message
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                botId: document.getElementById('botId').value,
+                chatId: document.getElementById('chatId').value,
+                text: document.getElementById('messageText').value,
+                buttons: getButtons(),
+                sendTime: document.getElementById('sendTime').value,
+                repeat: document.getElementById('repeat').value,
+                customInterval: document.getElementById('customInterval').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Message scheduled!');
+                    document.getElementById('scheduleForm').reset();
+                    loadMessages();
+                } else alert('Failed');
+            } catch(e) { alert('Error'); }
+        });
+        
+        document.getElementById('repeat').addEventListener('change', function() {
+            document.getElementById('customIntervalGroup').style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+        
+        async function loadMessages() {
+            try {
+                const res = await fetch(`${API_URL}/messages`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const msgs = await res.json();
+                if (!msgs.length) {
+                    document.getElementById('messagesList').innerHTML = '<div class="loading">No messages</div>';
+                    return;
+                }
+                document.getElementById('messagesList').innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Chat</th><th>Message</th><th>Send Time</th><th>Status</th><th></th></tr></thead>
+                            <tbody>
+                                ${msgs.map(m => `
+                                    <tr>
+                                        <td>${m.chatId}</td>
+                                        <td>${m.text?.substring(0, 50) || ''}${m.buttons?.length ? ' [🔘]' : ''}</td>
+                                        <td>${new Date(m.sendTime).toLocaleString()}</td>
+                                        <td><span class="badge ${m.sent ? 'badge-success' : 'badge-pending'}">${m.sent ? 'Sent' : 'Pending'}</span></td>
+                                        <td>${!m.sent ? `<button onclick="deleteMessage('${m._id}')" class="danger">Delete</button>` : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch(e) { console.error(e); }
+        }
+        
+        async function deleteMessage(id) {
+            if (!confirm('Delete?')) return;
+            await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            loadMessages();
+        }
+        
+        async function loadBotsSelect() {
+            try {
+                const res = await fetch(`${API_URL}/bots`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const bots = await res.json();
+                const select = document.getElementById('botId');
+                select.innerHTML = bots.map(b => `<option value="${b._id}">${b.name} (@${b.username})</option>`).join('');
+            } catch(e) { console.error(e); }
+        }
+        
+        async function loadBots() {
+            try {
+                const res = await fetch(`${API_URL}/bots`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const bots = await res.json();
+                document.getElementById('botsList').innerHTML = bots.length ? `
+                    <div class="table-container"><table>
+                        <thead><tr><th>Name</th><th>Username</th><th>Token</th><th></th></tr></thead>
+                        <tbody>${bots.map(b => `
+                            <tr><td>${b.name}</td><td>@${b.username}</td><td>••••••••</td>
+                            <td><button onclick="deleteBot('${b._id}')" class="danger">Remove</button></td></tr>
+                        `).join('')}</tbody>
+                    </table></div>
+                ` : '<div class="loading">No bots added</div>';
+            } catch(e) { console.error(e); }
+        }
+        
+        async function deleteBot(id) {
+            if (!confirm('Remove bot?')) return;
+            await fetch(`${API_URL}/bots/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            loadBots();
+            loadBotsSelect();
+        }
+        
+        function showAddBotModal() {
+            const name = prompt('Bot name:');
+            if (!name) return;
+            const token = prompt('Bot token:');
+            if (!token) return;
+            addBot(name, token);
+        }
+        
+        async function addBot(name, token) {
+            const res = await fetch(`${API_URL}/bots`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ name, token })
+            });
+            if (res.ok) { loadBots(); loadBotsSelect(); alert('Bot added'); }
+            else alert('Invalid token');
+        }
+        
+        async function loadAdmins() {
+            if (user.role !== 'super_admin') return;
+            try {
+                const res = await fetch(`${API_URL}/admins`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const admins = await res.json();
+                document.getElementById('adminsList').innerHTML = admins.length ? `
+                    <div class="table-container"><table>
+                        <thead><tr><th>Username</th><th>Email</th><th>Buttons</th><th>Manage Bots</th><th></th></tr></thead>
+                        <tbody>${admins.map(a => `
+                            <tr>
+                                <td>${a.username}</td><td>${a.email}</td>
+                                <td><input type="checkbox" ${a.permissions.addButtons ? 'checked' : ''} onchange="updatePermission('${a._id}', 'addButtons', this.checked)"></td>
+                                <td><input type="checkbox" ${a.permissions.manageBots ? 'checked' : ''} onchange="updatePermission('${a._id}', 'manageBots', this.checked)"></td>
+                                <td><button onclick="removeAdmin('${a._id}')" class="danger">Remove</button></td>
+                            </tr>
+                        `).join('')}</tbody>
+                    </table></div>
+                ` : '<div class="loading">No admins</div>';
+            } catch(e) { console.error(e); }
+        }
+        
+        async function updatePermission(adminId, permission, value) {
+            const admin = (await (await fetch(`${API_URL}/admins/${adminId}`, { headers: { 'Authorization': `Bearer ${token}` } })).json());
+            const permissions = admin.permissions;
+            permissions[permission] = value;
+            await fetch(`${API_URL}/admins/${adminId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ permissions })
+            });
+            loadAdmins();
+        }
+        
+        function showAddAdminModal() {
+            const username = prompt('Username:');
+            if (!username) return;
+            const email = prompt('Email:');
+            if (!email) return;
+            const password = prompt('Password:');
+            if (!password) return;
+            addAdmin(username, email, password);
+        }
+        
+        async function addAdmin(username, email, password) {
+            const res = await fetch(`${API_URL}/admins`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ username, email, password, permissions: { addButtons: false, manageBots: false } })
+            });
+            if (res.ok) { loadAdmins(); alert('Admin added'); }
+            else alert('Failed');
+        }
+        
+        async function removeAdmin(id) {
+            if (!confirm('Remove admin?')) return;
+            await fetch(`${API_URL}/admins/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            loadAdmins();
+        }
+        
+        async function loadLogs() {
+            try {
+                const res = await fetch(`${API_URL}/logs`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const logs = await res.json();
+                document.getElementById('logsList').innerHTML = logs.length ? `
+                    <div class="table-container"><table>
+                        <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+                        <tbody>${logs.map(l => `
+                            <tr><td>${l.userId?.username || '-'}</td><td>${l.action}</td><td>${JSON.stringify(l.details)}</td><td>${new Date(l.createdAt).toLocaleString()}</td></tr>
+                        `).join('')}</tbody>
+                    </table></div>
+                ` : '<div class="loading">No logs</div>';
+            } catch(e) { console.error(e); }
+        }
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+        
+        // Set default time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 5);
+        document.getElementById('sendTime').value = now.toISOString().slice(0, 16);
+        
+        // Initial loads
+        loadStats();
+        loadBotsSelect();
+        loadMessages();
+        loadBots();
+        if (user.role === 'super_admin') loadAdmins();
+        loadLogs();
+        
+        // Session timeout (30 min)
+        let timeout;
+        function resetTimer() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => { logout(); alert('Session expired'); }, 30 * 60 * 1000);
+        }
+        document.onmousemove = resetTimer;
+        document.onkeypress = resetTimer;
+        resetTimer();
+    </script>
+</body>
+</html>
