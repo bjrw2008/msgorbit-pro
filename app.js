@@ -34,11 +34,11 @@ async function createSuperAdmin() {
   try {
     const adminExists = await User.findOne({ role: 'super_admin' });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('Admin123!', 10);
+      const hashedPassword = await bcrypt.hash('incorrect', 10);
       const superAdmin = new User({
         username: 'superadmin',
-        email: 'bj@msgorbit.com',
-        password:$2a$12$tBAnbE6dfUBTzc0TesmSNORn9CeId3c9Q3XTHx3EWIj38t4aEi5g6,
+        email: 'admin@msgorbit.com',
+        password: hashedPassword,
         role: 'super_admin',
         permissions: {
           addButtons: true,
@@ -55,7 +55,6 @@ async function createSuperAdmin() {
     console.error('Error creating super admin:', error);
   }
 }
-
 // Serve dashboard
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
