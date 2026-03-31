@@ -587,23 +587,31 @@
             loadBotsSelect();
         }
         
-        function showAddBotModal() {
-            const name = prompt('Bot name:');
-            if (!name) return;
-            const token = prompt('Bot token:');
-            if (!token) return;
-            addBot(name, token);
-        }
-        
-        async function addBot(name, token) {
-            const res = await fetch(`${API_URL}/bots`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ name, token })
-            });
-            if (res.ok) { loadBots(); loadBotsSelect(); alert('Bot added'); }
-            else alert('Invalid token');
-        }
+  function showAddBotModal() {
+    const name = prompt('Bot name:');
+    if (!name) return;
+    const botToken = prompt('Bot token:');
+    if (!botToken) return;
+    addBot(name, botToken);
+}
+        async function addBot(name, botToken) {
+    const res = await fetch(`${API_URL}/bots`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify({ name, token: botToken })
+    });
+    if (res.ok) { 
+        loadBots(); 
+        loadBotsSelect(); 
+        alert('Bot added'); 
+    } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to add bot');
+    }
+}
         
         async function loadAdmins() {
             if (user.role !== 'super_admin') return;
