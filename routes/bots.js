@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { Telegraf } = require('telegraf');
 const Bot = require('../models/Bot');
 const ActivityLog = require('../models/ActivityLog');
 const { authMiddleware, checkPermission } = require('../middleware/auth');
@@ -17,19 +16,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Add new bot (requires manageBots permission)
+// Add new bot (skip verification)
 router.post('/', checkPermission('manageBots'), async (req, res) => {
   try {
     const { name, token } = req.body;
 
-    // Verify bot token
-    const bot = new Telegraf(token);
-    const botInfo = await bot.telegram.getMe();
-
     const newBot = new Bot({
       name,
       token,
-      username: botInfo.username,
+      username: name,
       createdBy: req.user._id
     });
 
@@ -38,12 +33,12 @@ router.post('/', checkPermission('manageBots'), async (req, res) => {
     await ActivityLog.create({
       userId: req.user._id,
       action: 'add_bot',
-      details: { botName: name, botUsername: botInfo.username }
+      details: { botName: name }
     });
 
     res.status(201).json({ message: 'Bot added', bot: newBot });
   } catch (error) {
-    res.status(400).json({ error: 'Invalid bot token or bot not accessible' });
+    res.status(400).json({ error: 'Failed to add bot' });
   }
 });
 
